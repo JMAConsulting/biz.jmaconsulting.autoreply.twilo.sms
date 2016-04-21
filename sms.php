@@ -266,10 +266,10 @@ function sms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     );
     $activityContacts = civicrm_api3('ActivityContact', 'get', array('activity_id' => $objectRef->id));
     foreach ($activityContacts['values'] as $values) {
-      if ($values['record_type_id'] == 2) {
+      if ($values['record_type_id'] == 3) {
        $contactIds[] = $values['contact_id'];
       }
-      elseif ($values['record_type_id'] == 3) {
+      elseif ($values['record_type_id'] == 2) {
         $userID = $values['contact_id'];
       }
     }
