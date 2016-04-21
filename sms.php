@@ -223,3 +223,74 @@ function sms_civicrm_postProcess($formName, &$form) {
     }
   }
 }
+
+/**
+ * Implements hook_civicrm_post().
+ *
+ */
+function sms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($objectName == 'Activity' && $op == 'create') {
+    $activityTypeID = CRM_Core_OptionGroup::getValue('activity_type', 'Inbound SMS', 'name');
+    if ($objectRef->activity_type_id != $activityTypeID) {
+      return FALSE;
+    }
+
+    $phoneNumber = CRM_Utils_Request::retrieve('From', 'String');
+    $toNumber = CRM_Utils_Request::retrieve('To', 'String');
+    $accountSid = CRM_Utils_Request::retrieve('AccountSid', 'String');
+    $provider = CRM_Utils_Request::retrieve('provider', 'String');
+    $smsProviders = civicrm_api3('SmsProvider', 'get', array(
+      'name' => $provider,
+      'username' => $accountSid,
+      'is_active' => 1,
+    ));
+    $userID = $providerID = $smsText = NULL;
+    foreach ($smsProviders['values'] as $values) {
+      $id = $values['id'];
+      $settings = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'twilio_reply_' . $id);
+      if (!empty($settings) && CRM_Utils_Array::value('is_auto_reply', $settings)) {
+        $providerID = $id;
+        $smsText = $settings['auto_reply_message'];
+        break;
+      }
+    }
+    if ($providerID == NULL || $smsText == NULL) {
+      return FALSE;
+    }
+    $returnProperties = array(
+      'sort_name' => 1,
+      'phone' => 1,
+      'do_not_sms' => 1,
+      'is_deceased' => 1,
+      'display_name' => 1,
+    );
+    $activityContacts = civicrm_api3('ActivityContact', 'get', array('activity_id' => $objectRef->id));
+    foreach ($activityContacts['values'] as $values) {
+      if ($values['record_type_id'] == 2) {
+       $contactIds[] = $values['contact_id'];
+      }
+      elseif ($values['record_type_id'] == 3) {
+        $userID = $values['contact_id'];
+      }
+    }
+    list($contactDetails) = CRM_Utils_Token::getTokenDetails($contactIds,
+      $returnProperties,
+      FALSE,
+      FALSE
+    );
+    $formattedContactDetails[] = reset($contactDetails);
+    $thisValues = $smsParams = array(
+      'activity_subject' => ts('Inbound auto-reply SMS'),
+      'sms_provider_id' => $providerID,
+      'sms_text_message' => $smsText,
+      'SMSsaveTemplateName' => NULL,
+      'provider_id' => $providerID,
+    );
+     list($sent, $activityId, $countSuccess) = CRM_Activity_BAO_Activity::sendSMS($formattedContactDetails,
+      $thisValues,
+      $smsParams,
+      $contactIds,
+      $userID
+    );
+  }
+}
