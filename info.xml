@@ -1,26 +1,28 @@
 <?xml version="1.0"?>
 <extension key="biz.jmaconsulting.autoreply.twilo.sms" type="module">
+  <downloadUrl>https://github.com/JMAConsulting/biz.jmaconsulting.autoreply.twilo.sms/archive/autoreply.twilo.sms-1.0.zip</downloadUrl>
   <file>sms</file>
   <name>Auto-reply Twilio SMS</name>
   <description>This extension sends sms as a autoreply when Inbound SMS activity is recorded.</description>
   <license>AGPL-3.0</license>
   <maintainer>
-    <author>Joe Murray</author>
-    <email>joe.murray@jmaconsulting.biz</email>
+    <author>JMA Consulting</author>
+    <email>support@jmaconsulting.biz</email>
   </maintainer>
   <urls>
-    <url desc="Main Extension Page">http://FIXME</url>
-    <url desc="Documentation">http://FIXME</url>
-    <url desc="Support">http://FIXME</url>
+    <url desc="Main Extension Page">https://github.com/JMAConsulting/biz.jmaconsulting.autoreply.twilo.sms/blob/master/README.md</url>
+    <url desc="Documentation">https://github.com/JMAConsulting/biz.jmaconsulting.autoreply.twilo.sms/blob/master/README.md</url>
+    <url desc="Support">https://github.com/JMAConsulting/biz.jmaconsulting.autoreply.twilo.sms/issues</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2016-04-21</releaseDate>
+  <releaseDate>2017-12-19</releaseDate>
   <version>1.0</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.6</ver>
+    <ver>4.7</ver>
   </compatibility>
-  <comments>This extension sends sms as a autoreply when Inbound SMS activity is recorded.</comments>
+  <comments>Many thanks to New Reach Media for sponsoring the development of this extension.</comments>
   <civix>
     <namespace>CRM/Sms</namespace>
   </civix>
