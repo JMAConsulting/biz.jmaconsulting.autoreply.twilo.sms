@@ -14,8 +14,6 @@ function sms_civicrm_config(&$config) {
 /**
  * Implements hook_civicrm_xmlMenu().
  *
- * @param array $files
- *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
  */
 function sms_civicrm_xmlMenu(&$files) {
@@ -61,13 +59,6 @@ function sms_civicrm_disable() {
 /**
  * Implements hook_civicrm_upgrade().
  *
- * @param $op string, the type of operation being performed; 'check' or 'enqueue'
- * @param $queue CRM_Queue_Queue, (for 'enqueue') the modifiable list of pending up upgrade tasks
- *
- * @return mixed
- *   Based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
- *                for 'enqueue', returns void
- *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
  */
 function sms_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
@@ -91,8 +82,6 @@ function sms_civicrm_managed(&$entities) {
  *
  * Generate a list of case-types.
  *
- * @param array $caseTypes
- *
  * Note: This hook only runs in CiviCRM 4.4+.
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
@@ -112,7 +101,7 @@ function sms_civicrm_caseTypes(&$caseTypes) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
  */
 function sms_civicrm_angularModules(&$angularModules) {
-_sms_civix_civicrm_angularModules($angularModules);
+  _sms_civix_civicrm_angularModules($angularModules);
 }
 
 /**
@@ -125,41 +114,7 @@ function sms_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
 }
 
 /**
- * Functions below this ship commented out. Uncomment as required.
- *
-
-/**
- * Implements hook_civicrm_preProcess().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
- *
-function sms_civicrm_preProcess($formName, &$form) {
-
-} // */
-
-/**
- * Implements hook_civicrm_navigationMenu().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
- *
-function sms_civicrm_navigationMenu(&$menu) {
-  _sms_civix_insert_navigation_menu($menu, NULL, array(
-    'label' => ts('The Page', array('domain' => 'biz.jmaconsulting.autoreply.twilo.sms')),
-    'name' => 'the_page',
-    'url' => 'civicrm/the-page',
-    'permission' => 'access CiviReport,access CiviContribute',
-    'operator' => 'OR',
-    'separator' => 0,
-  ));
-  _sms_civix_navigationMenu($menu);
-} // */
-
-/**
- * Implements hook_civicrm_buildForm().
- *
- *
- * @param string $formName
- * @param CRM_Core_Form $form
+ * Implements hook_civicrm_build().
  */
 function sms_civicrm_buildForm($formName, &$form) {
   if ('CRM_SMS_Form_Provider' == $formName) {
@@ -181,19 +136,13 @@ function sms_civicrm_buildForm($formName, &$form) {
 
 /**
  * Implements hook_civicrm_validateForm().
- *
- * @param string $formName
- * @param array $fields
- * @param array $files
- * @param CRM_Core_Form $form
- * @param array $errors
  */
 function sms_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
   if ('CRM_SMS_Form_Provider' == $formName) {
     if ($fields['name'] != 'org.civicrm.sms.twilio') {
       return FALSE;
     }
-    $fields['auto_reply_message'] = trim($fields['auto_reply_message'] );
+    $fields['auto_reply_message'] = trim($fields['auto_reply_message']);
     if (!empty($fields['is_auto_reply']) && empty($fields['auto_reply_message'])) {
       $errors['auto_reply_message'] = ts('Content of Autoreply to send is a required field.');
     }
@@ -203,8 +152,6 @@ function sms_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors
 /**
  * Implements hook_civicrm_postProcess().
  *
- * @param string $formName
- * @param CRM_Core_Form $form
  */
 function sms_civicrm_postProcess($formName, &$form) {
   if ('CRM_SMS_Form_Provider' == $formName) {
@@ -267,7 +214,7 @@ function sms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     $activityContacts = civicrm_api3('ActivityContact', 'get', array('activity_id' => $objectRef->id));
     foreach ($activityContacts['values'] as $values) {
       if ($values['record_type_id'] == 3) {
-       $contactIds[] = $values['contact_id'];
+        $contactIds[] = $values['contact_id'];
       }
       elseif ($values['record_type_id'] == 2) {
         $userID = $values['contact_id'];
@@ -286,7 +233,7 @@ function sms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       'SMSsaveTemplateName' => NULL,
       'provider_id' => $providerID,
     );
-     list($sent, $activityId, $countSuccess) = CRM_Activity_BAO_Activity::sendSMS($formattedContactDetails,
+    list($sent, $activityId, $countSuccess) = CRM_Activity_BAO_Activity::sendSMS($formattedContactDetails,
       $thisValues,
       $smsParams,
       $contactIds,
