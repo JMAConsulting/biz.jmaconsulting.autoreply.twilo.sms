@@ -232,7 +232,7 @@ function sms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       if ($values['record_type_id'] == CRM_Core_PseudoConstant::getKey('CRM_Activity_DAO_ActivityContact', 'record_type_id', 'Activity Targets')) {
         $contactIds[] = $values['contact_id'];
       }
-      elseif ($values['record_type_id'] == CRM_Core_PseudoConstant::getKey('CRM_Activity_DAO_ActivityContact', 'record_type_id', 'Activity Source ')) {
+      elseif ($values['record_type_id'] == CRM_Core_PseudoConstant::getKey('CRM_Activity_DAO_ActivityContact', 'record_type_id', 'Activity Source')) {
         $userID = $values['contact_id'];
       }
     }
