@@ -4,7 +4,7 @@
 
 ## Overview
 
-This extension sends sms as a auto-reply when Inbound SMS activity is recorded.
+This extension sends an SMS as an auto-reply when Inbound SMS activity is recorded.
 
 ## Installation
 
@@ -28,6 +28,6 @@ This extension sends sms as a auto-reply when Inbound SMS activity is recorded.
     1. Edit the SMS Provider to add auto-reply text.
         1. Check on 'Autoreply to inbound SMS messages?' and add sms text into 'Content of Autoreply to send' textarea field.
 
-JMA Consulting developed and maintains this extension.
+This extension has been developed and is being maintained by JMA.
 
-Many thanks to New Reach Media for sponsoring the development of this extension.
+Many thanks to [a New Reach Media](https://www.newreachmedia.com/) for sponsoring the development of this extension.
