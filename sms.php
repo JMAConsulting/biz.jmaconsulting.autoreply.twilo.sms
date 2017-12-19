@@ -117,13 +117,16 @@ function sms_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  * Implements hook_civicrm_build().
  */
 function sms_civicrm_buildForm($formName, &$form) {
-  if ('CRM_SMS_Form_Provider' == $formName) {
+  if ('CRM_SMS_Form_Provider' == $formName && !($form->_action & CRM_Core_Action::DELETE)) {
+    if ('org.civicrm.sms.twilio' != CRM_Utils_Array::value('name', $form->_defaultValues)) {
+      return NULL;
+    }
     $id = $form->getVar('_id');
     $form->addElement('checkbox', 'is_auto_reply', ts('Autoreply to inbound SMS messages?'));
     $form->add('textarea', 'auto_reply_message', ts('Content of Autoreply to send'),
       "cols=50 rows=6"
     );
-    // FIXME : fix tpl for only twilo reply
+
     CRM_Core_Region::instance('page-body')->add(array(
       'template' => 'CRM/SMS/Form/Provider.extra.tpl',
     ));
@@ -138,7 +141,7 @@ function sms_civicrm_buildForm($formName, &$form) {
  * Implements hook_civicrm_validateForm().
  */
 function sms_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
-  if ('CRM_SMS_Form_Provider' == $formName) {
+  if ('CRM_SMS_Form_Provider' == $formName && !($form->_action & CRM_Core_Action::DELETE)) {
     if ($fields['name'] != 'org.civicrm.sms.twilio') {
       return FALSE;
     }
@@ -154,18 +157,25 @@ function sms_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors
  *
  */
 function sms_civicrm_postProcess($formName, &$form) {
-  if ('CRM_SMS_Form_Provider' == $formName) {
+  if ('CRM_SMS_Form_Provider' == $formName && !($form->_action & CRM_Core_Action::DELETE)) {
     $submitValues = $form->_submitValues;
     if ($submitValues['name'] != 'org.civicrm.sms.twilio') {
       return FALSE;
     }
-    if (array_key_exists('is_auto_reply', $submitValues)) {
+    if (!empty($submitValues['is_auto_reply'])) {
       $params = array(
         'is_auto_reply' => $submitValues['is_auto_reply'],
         'auto_reply_message' => $submitValues['auto_reply_message'],
       );
-      // FIXME: incase of new form submission
       $id = $form->getVar('_id');
+      if (!$id) {
+        $id = civicrm_api3('SmsProvider', 'getvalue', array_merge(
+          array(
+            'return' => 'id',
+            'options' => array('limit' => 1, 'sort' => 'id DESC'),
+          ), $submitValues)
+        );
+      }
       CRM_Core_BAO_Setting::setItem($params, CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'twilio_reply_' . $id);
     }
   }
@@ -177,7 +187,12 @@ function sms_civicrm_postProcess($formName, &$form) {
  */
 function sms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if ($objectName == 'Activity' && $op == 'create') {
-    $activityTypeID = CRM_Core_OptionGroup::getValue('activity_type', 'Inbound SMS', 'name');
+
+    $activityTypeID = civicrm_api3('OptionValue', 'getvalue', array(
+      'return' => 'value',
+      'option_group_id' => 'activity_type',
+      'name' => 'Inbound SMS',
+    ));
     if ($objectRef->activity_type_id != $activityTypeID) {
       return FALSE;
     }
@@ -195,7 +210,7 @@ function sms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     foreach ($smsProviders['values'] as $values) {
       $id = $values['id'];
       $settings = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'twilio_reply_' . $id);
-      if (!empty($settings) && CRM_Utils_Array::value('is_auto_reply', $settings)) {
+      if (!empty($settings) && !empty($settings['is_auto_reply'])) {
         $providerID = $id;
         $smsText = $settings['auto_reply_message'];
         break;
@@ -212,11 +227,12 @@ function sms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       'display_name' => 1,
     );
     $activityContacts = civicrm_api3('ActivityContact', 'get', array('activity_id' => $objectRef->id));
+
     foreach ($activityContacts['values'] as $values) {
-      if ($values['record_type_id'] == 3) {
+      if ($values['record_type_id'] == CRM_Core_PseudoConstant::getKey('CRM_Activity_DAO_ActivityContact', 'record_type_id', 'Activity Targets')) {
         $contactIds[] = $values['contact_id'];
       }
-      elseif ($values['record_type_id'] == 2) {
+      elseif ($values['record_type_id'] == CRM_Core_PseudoConstant::getKey('CRM_Activity_DAO_ActivityContact', 'record_type_id', 'Activity Source ')) {
         $userID = $values['contact_id'];
       }
     }
