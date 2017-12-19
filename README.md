@@ -30,4 +30,4 @@ This extension sends an SMS as an auto-reply when Inbound SMS activity is record
 
 This extension has been developed and is being maintained by JMA.
 
-Many thanks to [a New Reach Media](https://www.newreachmedia.com/) for sponsoring the development of this extension.
+Many thanks to [New Reach Media](https://www.newreachmedia.com/) for sponsoring the development of this extension.
